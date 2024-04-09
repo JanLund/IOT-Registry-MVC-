@@ -1,0 +1,17 @@
+
+.indexContainer {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    max-width: 500px;
+    margin: 20px;
+}
+.instanceContainer {
+    display: grid;
+    grid-template-columns: 30px 30px 30px 30px 35px 1fr;
+    max-width: 500px;
+    margin: 20px;
+}
+
+.deviceIndexAddress {
+    color: blue;
+}
