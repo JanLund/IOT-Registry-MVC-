@@ -134,11 +134,6 @@ class View {
          const MACAddress = this.createElement('div')
          MACAddress.classList.add("deviceIndexAddress")
          MACAddress.value = entry.id
-         // MACAddress.addEventListener("click", function (e) {
-         //    console.log(e.currentTarget.innerText);
-         //    console.log(`Event target ${e.currentTarget.value}`)
-         // });
-
 
          MACAddress.innerText = entry.id
          indexContainer.append(deviceName, MACAddress)
@@ -149,8 +144,138 @@ class View {
 
    }
 
+   promptedReadOnlyEntry(lbl,value,container) {
+      const prompt = this.createElement('label','col1-5');
+      prompt.innerText = lbl;
+      
+      const input = this.createElement('input','col-last')
+      input.value = value;
+      input.readOnly = true;
+      container.append(prompt,input)
+   }
 
-   displayDeviceInstances(deviceInstance) {
+   promptedReadOnlyEntry(promptTxt,value,container) {
+      const prompt = this.createElement('label','col1-5');
+      prompt.innerText = promptTxt;
+      
+      const input = this.createElement('input','col-last')
+      input.value = value;
+      input.readOnly = true;
+      container.append(prompt,input)
+   }
+
+   promptedDropDownEntry(promptTxt,value,container) {
+
+       const prompt = this.createElement('label','col1-5');
+      prompt.innerText = promptTxt;
+      
+
+      const flexRow = this.createElement('div','col-last');
+      flexRow.style = 'display:flex;flex-direction:row';
+
+      const rowInput = this.createElement('input');
+      rowInput.style.width ='70%';
+      rowInput.value = value;
+
+      const select = this.createElement('select');
+      select.style.width ='30%';
+      select.onchange=this.onModeChanged;
+      select.inputElement = rowInput;
+
+      const option1 = this.createElement('option');
+      option1.value = 'Simulated'
+      option1.innerText = 'Simulated'
+
+      const option2 = this.createElement('option');
+      option2.value = 'Real'
+      option2.innerText = 'Real'
+
+      select.append(option1,option2)
+      flexRow.append(rowInput,select)
+
+      container.append(prompt,flexRow)
+   }
+
+   promptedButtonEntry(promptTxt,value,container) {
+
+      const prompt = this.createElement('label','col1-5');
+      prompt.innerText = promptTxt;
+
+      const button = this.createElement('button','col-last');
+      button.innerText = value;
+      button.addEventListener("click", (e) => {
+         console.log(`Button pressed ${e}`)
+         this.busInstanceEntry(this)
+      })
+
+      container.append(prompt,button)
+   }
+
+
+   busInstanceEntry(val){
+      function   promptedDropDownEntry(promptTxt,value,container) {
+
+         const prompt = val.createElement('label','col2-5');
+        prompt.innerText = promptTxt;
+        
+  
+        const flexRow = val.createElement('div','col-last');
+        flexRow.style = 'display:flex;flex-direction:row';
+  
+        const rowInput = val.createElement('input');
+        rowInput.style.width ='70%';
+        rowInput.value = value;
+  
+        const select = val.createElement('select');
+        select.style.width ='30%';
+      //   select.onchange=this.onModeChanged;
+        select.inputElement = rowInput;
+  
+        const option1 = val.createElement('option');
+        option1.value = 'Simulated'
+        option1.innerText = 'Simulated'
+  
+        const option2 = val.createElement('option');
+        option2.value = 'Real'
+        option2.innerText = 'Real'
+  
+        select.append(option1,option2)
+        flexRow.append(rowInput,select)
+  
+        container.append(prompt,flexRow)
+     }
+  
+      function promptedButtonEntry(promptTxt,value,container) {
+
+         
+         const prompt = val.createElement('label','col2-5');
+         prompt.innerText = promptTxt;
+   
+         const button = val.createElement('button','col-last');
+         button.innerText = value;
+         button.addEventListener("click", (e) => {
+            console.log(`Button pressed ${e}`)
+         })
+   
+         container.append(prompt,button)
+      
+      }
+
+      promptedDropDownEntry('BusInstance:','None',this.instanceContainer)
+      promptedButtonEntry('Sensors:',' Add Sensor',this.instanceContainer)
+      promptedButtonEntry('Actuators:',' Add Actuator',this.instanceContainer)
+   }
+
+
+
+   onModeChanged(e) {
+      console.log("OnModeChanged",e.target.value)
+      e.target.inputElement.value = e.target.value;
+
+   }
+
+
+    displayDeviceInstances(deviceInstance) {
       console.log(deviceInstance)
 
       while (this.app.firstChild) {
@@ -161,20 +286,28 @@ class View {
       this.title.textContent = 'IOT Registry'
 
       const instanceHeader = this.createElement('h1')
-      instanceHeader.innerText = "Device Index"
+      instanceHeader.innerText = "Device Instance"
 
 
       this.app.append(this.title, instanceHeader)
 
-      const instanceContainer = this.createElement('div', 'instanceContainer')
+      this.instanceContainer = this.createElement('div', 'instanceContainer')
+ 
 
+      this.promptedReadOnlyEntry('Id',deviceInstance['id'],this.instanceContainer)
+      this.promptedReadOnlyEntry('Name',deviceInstance['name'],this.instanceContainer)
+      this.promptedReadOnlyEntry('Type',deviceInstance['type'],this.instanceContainer)
+      this.promptedReadOnlyEntry('Instance',deviceInstance['instance'],this.instanceContainer)
 
+      this.promptedDropDownEntry('Data Mode',deviceInstance['mode'],this.instanceContainer)
 
-      // <label class="col1-5" for="id">Id</label><input class="col-last" value={{deviceIndex["id"]}} type="text" name="device_id" id="id" readonly></input>
-      // <label class="col1-5" for="deviceName" >Name</label><input class="col-last" value={{deviceIndex["name"]}} type="text" id="deviceName" readonly></input>
-      // <label class="col1-5" for="deviceType" >Type</label><input class="col-last" value={{deviceIndex["type"]}} type="text" id="deviceType" readonly></input>
-      // <label class="col1-5" for="deviceInstance" >Instance</label><input class="col-last" value={{deviceIndex["instance"]}} type="text"  id="deviceInstance" readonly></input>
+      this.promptedButtonEntry('Buses:',' Add Bus',this.instanceContainer)
+
   
+  
+  
+      this.app.append(this.instanceContainer)
+
 
 
 
