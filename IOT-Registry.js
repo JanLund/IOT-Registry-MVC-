@@ -35,13 +35,9 @@ class Model {
    }
 
    get deviceType() {
-
-      const typeId = (value, index, array) => {
-         return value.id == this.deviceInstance.type;
-      }
-
-      return this.deviceTypes.find(typeId)
-
+      return this.deviceTypes.find(
+         type => type.id === this.deviceInstance.type
+      );
    }
 
    get deviceIndex() {
@@ -49,60 +45,50 @@ class Model {
    }
 
 
-
-
    async fetchDeviceTypes() {
-      let url = "http://localhost:8088/api/deviceTypes";
-      let msg
-      let data
+      const url = "http://localhost:8088/api/deviceTypes";
       try {
 
          const response = await fetch(url)
-         msg = await response.json()
-         data = await msg.data
-         console.log(data)
+         const msg = await response.json()
+         const data = await msg.data
          return data
 
       } catch (error) {
-         console.log(error)
+         console.error(error);
+         throw error;
       }
    }
 
 
    async fetchDeviceInstances() {
-      let url = "http://localhost:8088/api/devices";
-      let msg
-      let data
+      const url = "http://localhost:8088/api/devices";
       try {
 
          const response = await fetch(url)
-         msg = await response.json()
-         data = await msg.data
+         const msg = await response.json()
+         const data = await msg.data
          console.log(data)
          return data
 
       } catch (error) {
-         console.log(error)
+         console.error(error);
+         throw error;
       }
    }
 
    async fetchIndexes() {
-      let url = "http://localhost:8088/api/deviceIndex";
-      let msg
-      let data
+      const url = "http://localhost:8088/api/deviceIndex";
       try {
-
-         const response = await fetch(url)
-         msg = await response.json()
-         data = await msg.data
-         console.log(data)
-         return data
-
+         const response = await fetch(url);
+         const msg = await response.json()
+         const data = await msg.data;
+         return data;
       } catch (error) {
-         console.log(error)
+         console.error(error);
+         throw error;
       }
    }
-
 }
 
 /**
@@ -225,7 +211,6 @@ class View {
       const button = this.createElement('button', 'col-last');
       button.innerText = value;
       button.addEventListener("click", (e) => {
-         console.log(`Button pressed ${e}`)
          this.busInstanceEntry(this)
       })
 
@@ -234,6 +219,11 @@ class View {
 
 
    busInstanceEntry(val) {
+
+      function onBusChanged(e) {
+         console.log("OnBusChanged", e.target.value)
+         e.target.inputElement.value = e.target.value;
+      }
       function promptedDropDownEntry(promptTxt, value, container, OptionList) {
 
          const prompt = val.createElement('label', 'col2-5');
@@ -249,22 +239,23 @@ class View {
 
          const select = val.createElement('select');
          select.style.width = '30%';
-         //   select.onchange=this.onModeChanged;
+         select.onchange= onBusChanged;
          select.inputElement = rowInput;
 
-         const option1 = val.createElement('option');
-         option1.value = 'Simulated'
-         option1.innerText = 'Simulated'
 
-         const option2 = val.createElement('option');
-         option2.value = 'Real'
-         option2.innerText = 'Real'
+         OptionList.forEach(option => {
 
-         select.append(option1, option2)
+            const optionElement = val.createElement('option');
+            optionElement.value = option
+            optionElement.innerText = option
+            select.append(optionElement)
+         })
+
          flexRow.append(rowInput, select)
 
          container.append(prompt, flexRow)
       }
+
 
       function promptedButtonEntry(promptTxt, value, container) {
 
@@ -282,7 +273,13 @@ class View {
 
       }
 
-      promptedDropDownEntry('BusInstance:', 'None', this.instanceContainer)
+
+      // this.model.deviceType
+      // console.log(deviceType);
+
+      const options = ["Simulated", "Real","Test"]
+
+      promptedDropDownEntry('BusInstance:', 'None', this.instanceContainer, options)
       promptedButtonEntry('Sensors:', ' Add Sensor', this.instanceContainer)
       promptedButtonEntry('Actuators:', ' Add Actuator', this.instanceContainer)
 
