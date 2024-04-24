@@ -12,8 +12,39 @@ class Model {
       this.deviceIndexes = await this.fetchIndexes()
       this.deviceInstanses = await this.fetchDeviceInstances()
       this.deviceTypes = await this.fetchDeviceTypes()
+
       console.log("DeviceTypes",this.deviceTypes)
    }
+
+   _commit(deviceInstance) {
+      console.log('_commit')
+      this.onDeviceInstanceChanged(deviceInstance,this.deviceType)
+    }
+
+
+// --------------------------bindings-----------------------------
+
+   bindDeviceInstanceChanged(callback) {
+      this.onDeviceInstanceChanged = callback
+   }
+
+   bindDeviceIndexesChanged(callback) {
+      this.onDeviceIndexesChanged = callback
+   }
+
+ 
+
+   // --------------------------handlers--------------------------
+
+   handleCurrentIndexChange = (value) => {
+      this.currentIndex = value
+      console.log(`model.currentIndex =  ${this.currentIndex}`)
+      console.log(`deviceInstance =  ${this.deviceInstance['name']}`)
+
+      this._commit(this.deviceInstance)
+
+   }
+
 
 
 
@@ -25,13 +56,9 @@ class Model {
    }
 
    get deviceInstance() {
-
-      const instanceOfId = (value, index, array) => {
-         return value.id == this.currentInstanceId;
-      }
-
-      return this.deviceInstanses.find(instanceOfId)
-
+      return this.deviceInstanses.find(
+         instance => instance.id === this.currentIndex
+      );
    }
 
    get deviceType() {
@@ -123,6 +150,43 @@ class View {
    }
 
 
+// ----------------------------------------------------------------
+   bindDeviceIndexesChanged(callback) {
+      this.onDeviceIndexesChanged = callback
+   }
+
+   bindEditDeviceInstance(handler) {
+
+      this.deviceIndexAddressList.forEach(element => {
+         element.addEventListener("click", handler);
+      });
+   }
+
+   bindCurrentIndexChanged(handler) {
+      console.log("bindCurrentIndexChanged")
+      this.deviceIndexAddressList.forEach(element => {
+         element.addEventListener("click", handler);
+      });
+      
+   }
+
+   bindEditDeviceInstance(handler) {
+
+      this.deviceIndexAddressList.forEach(element => {
+         element.addEventListener("click", handler);
+      });
+   }
+
+// ------------------------------------------------------------------------
+   onModeChanged(e) {
+      console.log("OnModeChanged", e.target.value)
+      e.target.inputElement.value = e.target.value;
+
+   }
+
+
+
+// ------------------------------------------------------------------------
    get deviceIndexAddressList() {
       return Array.from(document.getElementsByClassName("deviceIndexAddress"))
    }
@@ -157,8 +221,6 @@ class View {
 
       });
       this.app.append(h1, indexContainer)
-      console.log(indexContainer.tagName)
-
    }
 
    ReadOnlyEntryWithPrompt(promptTxt, value, container) {
@@ -288,15 +350,6 @@ class View {
       this.instanceContainer.append(divider)
    }
 
-
-
-   onModeChanged(e) {
-      console.log("OnModeChanged", e.target.value)
-      e.target.inputElement.value = e.target.value;
-
-   }
-
-
    displayDeviceInstances(deviceInstance,deviceType) {
       console.log(deviceInstance)
       console.log(deviceType)
@@ -354,13 +407,6 @@ class View {
    }
 
 
-   bindEditDeviceInstance(handler) {
-
-      this.deviceIndexAddressList.forEach(element => {
-         element.addEventListener("click", handler);
-      });
-   }
-
    createElement(tag, className) {
       const element = document.createElement(tag)
 
@@ -412,21 +458,40 @@ class Controller {
 
       // Display initial deviceIndexes
       this.onDeviceIndexesChanged(this.model.deviceIndex)
-      console.log("init()")
-      this.view.bindEditDeviceInstance(this.deviceInstanceHandler)
+
+      // ----------------------------------------------------------
+      this.model.bindDeviceIndexesChanged(this.onDeviceIndexesChanged);
+      this.model.bindDeviceInstanceChanged(this.onDeviceInstanceChanged)
+      this.view.bindCurrentIndexChanged(this.onCurrentIndexChanged);
+      // ----------------------------------------------------------
+
+
+
    }
 
-   onDeviceIndexesChanged = deviceIndexes => {
+   onDeviceIndexesChanged = (deviceIndexes) => {
+      console.log(`onDeviceIndexesChanged ${deviceIndexes}`)
       this.view.displayDeviceIndexes(deviceIndexes)
    }
 
-
-   deviceInstanceHandler = (e) => {
-      this.model.deviceInstanceId = e.currentTarget.value;   
-        
-
-      this.view.displayDeviceInstances(this.model.deviceInstance,this.model.deviceType)    // gets current deviceInstance object and display it
+   onCurrentIndexChanged = (e) => {
+      console.log(`onCurrentIndexChanged.`)
+      this.handleCurrentIndexChange(e.currentTarget.value)
    }
+
+
+   onDeviceInstanceChanged = (device,type) => {
+      
+      console.log(`onDeviceInstanceChanged instance ${device["name"]}`)
+      console.log(`onDeviceInstanceChanged type ${type["id"]}`)
+      this.view.displayDeviceInstances(device,type)
+   }
+
+   // -----------------------------------
+   handleCurrentIndexChange = (value) => {
+      this.model.handleCurrentIndexChange(value)
+   }
+   // -
 }
 
 
