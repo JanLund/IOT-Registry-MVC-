@@ -5,12 +5,7 @@
  */
 
 
-Array.prototype.indexOfId = function(id) {
-   for (var i = 0; i < this.length; i++)
-       if (this[i].id === id)
-           return i;
-   return -1;
-}
+
 
 
 
@@ -28,6 +23,8 @@ class Model {
 
       console.log("deviceInstanses",this.deviceInstanses)
       console.log("DeviceTypes",this.deviceTypes)
+
+
    }
 
    _commit(deviceInstance) {
@@ -54,6 +51,16 @@ class Model {
       this.currentIndex = value
       console.log(`model.currentIndex =  ${this.currentIndex}`)
       console.log(`deviceInstance =  ${this.deviceInstance['name']}`)
+
+      let currentType = new DeviceType(this.deviceType)
+      console.log("currentType",currentType)
+      
+      this.currentInstance = new DeviceInstance(this.deviceInstance['id'],this.deviceInstance['type'],this.deviceInstance['name'],this.deviceInstance['instance'],this.deviceInstance['mode'],currentType)
+   
+      console.log("currentInstance",this.currentInstance)
+
+
+
 
       this._commit(this.deviceInstance)
 
@@ -130,6 +137,22 @@ class Model {
          throw error;
       }
    }
+
+   async Save() {
+
+   // const response = await fetch('/api/deviceInstance', {
+   //    method:'POST',
+   //    headers: {
+   //      'Accept': 'application/json',
+   //      'Content-Type': 'application/json'
+   //    },
+   //    body: JSON.stringify(data)});
+
+   //    const jsonData = await response.json();
+   //    console.log( jsonData);
+  };
+
+
 }
 
 /**
