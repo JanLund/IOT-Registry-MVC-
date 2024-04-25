@@ -3,6 +3,17 @@
  *
  * Manages the data of the application.
  */
+
+
+Array.prototype.indexOfId = function(id) {
+   for (var i = 0; i < this.length; i++)
+       if (this[i].id === id)
+           return i;
+   return -1;
+}
+
+
+
 class Model {
    constructor() {
       this.currentInstanceId = 'FF:FF:FF:FF:FF:FF';
@@ -13,6 +24,9 @@ class Model {
       this.deviceInstanses = await this.fetchDeviceInstances()
       this.deviceTypes = await this.fetchDeviceTypes()
 
+      console.log("indexOf",this.deviceInstanses.indexOfId(this.currentInstanceId))
+
+      console.log("deviceInstanses",this.deviceInstanses)
       console.log("DeviceTypes",this.deviceTypes)
    }
 
@@ -176,13 +190,16 @@ class View {
          element.addEventListener("click", handler);
       });
    }
+   bindModeChanged(handler) {
 
-// ------------------------------------------------------------------------
-   onModeChanged(e) {
-      console.log("OnModeChanged", e.target.value)
-      e.target.inputElement.value = e.target.value;
-
+      this.onModeChanged = handler;
    }
+// ------------------------------------------------------------------------
+   // onModeChanged(e) {
+   //    console.log("OnModeChanged", e.target.value)
+   //    e.target.inputElement.value = e.target.value;
+
+   // }
 
 
 
@@ -463,6 +480,7 @@ class Controller {
       this.model.bindDeviceIndexesChanged(this.onDeviceIndexesChanged);
       this.model.bindDeviceInstanceChanged(this.onDeviceInstanceChanged)
       this.view.bindCurrentIndexChanged(this.onCurrentIndexChanged);
+      this.view.bindModeChanged(this.onModeChanged)
       // ----------------------------------------------------------
 
 
@@ -485,6 +503,12 @@ class Controller {
       console.log(`onDeviceInstanceChanged instance ${device["name"]}`)
       console.log(`onDeviceInstanceChanged type ${type["id"]}`)
       this.view.displayDeviceInstances(device,type)
+   }
+
+   onModeChanged(e) {
+      console.log("OnModeChanged", e.target.value)
+      e.target.inputElement.value = e.target.value;
+
    }
 
    // -----------------------------------
