@@ -1,0 +1,98 @@
+"data": [
+    {
+        "id": "DHT22",
+        "buses": [
+            {
+                "GPIO": 1
+            }
+        ],
+        "measurands": [
+            {
+                "name": "T1",
+                "quantity": "T",
+                "unit": "°C"
+            },
+            {
+                "name": "RH1",
+                "quantity": "Φ",
+                "unit": "%"
+            }
+        ]
+    },
+    {
+        "id": "DS18B20",
+        "buses": [
+            {
+                "1Wire": 1
+            }
+        ],
+        "measurands": [
+            {
+                "name": "T1",
+                "quantity": "T",
+                "unit": "°C"
+            }
+        ]
+    },
+    {
+        "id": "ADS1115",
+        "buses": [
+            {
+                "I2C": 1,
+                "addresses": [
+                    "0x48",
+                    "0x49",
+                    "0x4A",
+                    "0x4B"
+                ]
+            }
+        ],
+        "measurands": [
+            {
+                "name": "U1",
+                "quantity": "U",
+                "unit": "V"
+            },
+            {
+                "name": "U2",
+                "quantity": "U",
+                "unit": "V"
+            },
+            {
+                "name": "U3",
+                "quantity": "U",
+                "unit": "V"
+            },
+            {
+                "name": "U4",
+                "quantity": "U",
+                "unit": "V"
+            }
+        ]
+    },
+    {
+        "id": "DHT11",
+        "buses": [
+            {
+                "GPIO": 1
+            }
+        ],
+        "measurands": [
+            {
+                "name": "T1",
+                "quantity": "T",
+                "unit": "°C"
+            },
+            {
+                "name": "RH1",
+                "quantity": "Φ",
+                "unit": "%"
+            }
+        ]
+    }
+
+
+    "GPIO" : [ { "DHT11": { "measurands": [ { "name": "T1","quantity": "T", "unit": "°C" }, { "name": "RH1", "quantity": "Φ", "unit": "%" } ] , "addresses":[]}},
+               { "NONE": { "measurands": [] , "addresses":[]}} ]
+
+]
