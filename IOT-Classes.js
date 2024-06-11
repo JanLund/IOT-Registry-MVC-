@@ -14,6 +14,10 @@ class DeviceInstance {
 
     console.log("instanceObject", instanceObject)
     console.log("instanceObject.buses", instanceObject.buses)
+    if (instanceObject.buses === undefined) {
+      console.log("instanceObject.buses is undefined");
+      instanceObject.buses=[]
+  }
 
     this.id = instanceObject.id
     this.name = instanceObject.name
@@ -23,6 +27,7 @@ class DeviceInstance {
     this.deviceType = currentType
     this.model = model
     this.buses = []
+    console.log("instanceObject.buses",instanceObject.buses)
     instanceObject.buses.forEach(busObject => {
       console.log("busObject",busObject)
 
@@ -53,6 +58,11 @@ class BusInstance {
     this.type = busInstanceJsonObject.type
     this.instance = busInstanceJsonObject.instance
     this.id = this.type + "." + this.instance
+    if(busInstanceJsonObject.pins === undefined) {
+      busInstanceJsonObject.pins=[]
+      busInstanceJsonObject.sensors=[]
+      busInstanceJsonObject.actuators=[]
+    }
     this.pins = busInstanceJsonObject.pins
     this.sensors = busInstanceJsonObject.sensors
     this.actuators = busInstanceJsonObject.actuators

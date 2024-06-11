@@ -31,13 +31,6 @@ class Model {
          })
       })
       console.log("busSensorDic", this.busToSensors)
-      // console.log("indexOf", this.deviceInstanses.indexOfId(this.currentInstanceId))
-      // console.log("deviceInstanses", this.deviceInstanses)
-      // console.log("DeviceTypes", this.deviceTypes)
-      // console.log("BusTypes", this.busTypes)
-      // console.log("SensorTypes", this.sensorTypes)
-
-
    }
 
    _commit(deviceInstance) {
@@ -68,7 +61,6 @@ class Model {
       let currentType = new DeviceType(this.deviceType)
       console.log("currentType", currentType)
 
-      // this.currentInstance = new DeviceInstance(this.deviceInstance['id'], this.deviceInstance['type'], this.deviceInstance['name'], this.deviceInstance['instance'], this.deviceInstance['mode'], currentType)
       this.currentInstance = new DeviceInstance(this.deviceInstance, currentType,this)
 
       console.log("currentInstance", this.currentInstance)
@@ -78,7 +70,7 @@ class Model {
    }
 
    addBus = () => {
-      const noneObject = {type:"none",instance:this.currentInstance.buses.length}
+      const noneObject = {type:"none",instance:this.currentInstance.buses.length,pins:[],sensors:[],actuators:[]}
       let bus = new BusInstance(noneObject)
       // let bus = new BusInstance("none", this.currentInstance.buses.length)
       bus.model = this
@@ -94,8 +86,7 @@ class Model {
       console.log("model.addSensor")
    }
 
-
-
+ 
    /**
     * @param {any} instanceId
     */
@@ -199,6 +190,7 @@ class Model {
       console.log("model.Save()")
 
       const di = this.currentInstance
+      di.buses = di.buses.filter(bus => bus.type !== "none")
 
       const data = {
          "id": di.id,
@@ -230,6 +222,21 @@ class Model {
    };
 
 
+   validate = () => {
+      console.log("model.validate")
+      console.log("model.validateting instance =",this.currentInstance)
+      let result = true
+      if( !["Simulated","Real"].includes(this.currentInstance.mode)) {return false}
+
+      let busTypes = []
+      this.currentInstance.deviceType.buses.forEach(bus => { busTypes.push(bus.name)})
+      console.log("busTypes",busTypes)
+      this.currentInstance.buses.forEach( bus => {
+         if(!busTypes.includes(bus.type)){result = false}
+      })
+
+      return result
+   }
 }
 
 /**
@@ -241,20 +248,8 @@ class View {
    constructor() {
       this.app = this.getElement('#root')
 
-      // this.deviceIndexPage = this.createDeviceIndexPage()
-
-      // this.form = this.createElement('form')
-      // this.input = this.createElement('input')
-      // this.input.type = 'text'
-      // this.input.placeholder = 'Edit Instance'
-      // this.input.name = 'action'
-      // this.submitButton = this.createElement('button')
-      // this.submitButton.textContent = 'Submit'
-      // this.form.append(this.input, this.submitButton)
-
       this.title = this.createElement('h1')
       this.title.textContent = 'IOT Registry'
-
 
       this.app.append(this.title)
 
@@ -265,7 +260,10 @@ class View {
 
    // ----------------------------------------------------------------
 
-
+   validate = () => {
+      console.log("validate")
+      return true
+   }
 
 
    // ----------------------------------------------------------------
@@ -319,6 +317,11 @@ class View {
    bindSave(handler) {
       this.onSave = handler
    }
+
+   bindValidate(handler) {
+      this.validate = handler
+   }
+
 
    // ------------------------------------------------------------------------
    get deviceIndexAddressList() {
@@ -384,6 +387,7 @@ class View {
       select.style.width = '30%';
       select.onchange = this.onModeChanged;
       select.inputElement = rowInput;
+    
 
       const option1 = this.createElement('option');
       option1.value = 'Simulated'
@@ -394,6 +398,7 @@ class View {
       option2.innerText = 'Real'
 
       select.append(option1, option2)
+      select.value = value
       flexRow.append(rowInput, select)
 
       container.append(prompt, flexRow)
@@ -466,7 +471,6 @@ class View {
 
          let measurandHeaderElement = (container) => {
 
-
             const measurandHeaderElement = document.createElement("div");
             measurandHeaderElement.classList.add("selectObject.id" + ".Measurands");
             measurandHeaderElement.classList.add("col-last");
@@ -492,8 +496,7 @@ class View {
             measurandHeaderElement.appendChild(unitElement);
 
             container.append(measurandHeaderElement)
-            // parent.parentNode.insertBefore(measurandHeaderElement, parent.nextSibling);
-
+  
          }
 
          let measurandElement = (m, container) => {
@@ -582,7 +585,7 @@ class View {
 
 
 
-         const options = ["none"]
+         const options = ["none","delete"]
          deviceInstance.deviceType.buses.forEach(bt => {
             options.push(bt.name)
          })
@@ -639,6 +642,8 @@ class View {
          busInstanceEntry(bus)
       }
 
+      
+
       console.log(deviceInstance)
 
       while (this.app.firstChild) {
@@ -673,10 +678,14 @@ class View {
       deviceInstance.buses.forEach(bus => { displayBus(bus); })
 
       const saveButton = this.createElement('button')
-      saveButton.value = deviceInstance
       saveButton.innerText = 'Save'
-      saveButton.addEventListener("click", this.onSave);
-
+      if(this.validate()) {
+         saveButton.value = deviceInstance
+         saveButton.addEventListener("click", this.onSave);
+         saveButton.style.backgroundColor = "green";
+      }  else {
+         saveButton.style.backgroundColor = "red";
+      }
       this.app.append(this.instanceContainer, saveButton)
    }
 
@@ -703,8 +712,7 @@ class View {
       // })
    }
 
-   // ---------------------
-}
+ }
 
 /**
  * @class Controller
@@ -739,11 +747,10 @@ class Controller {
       this.view.bindAddSensor(this.onSensorAdded)
       this.view.bindSensorTypeChanged(this.onSensorTypeChanged)
       this.view.bindSave(this.onSave)
+      this.view.bindValidate(this.model.validate)
 
 
       // ----------------------------------------------------------
-
-
 
    }
 
@@ -765,28 +772,37 @@ class Controller {
       this.view.displayDeviceInstance(device)
    }
 
-   onModeChanged(e) {
+   onModeChanged = (e)=> {
       console.log("OnModeChanged", e.target.value)
       e.target.inputElement.value = e.target.value;
+      this.model.currentInstance.mode = e.target.value
+      this.view.displayDeviceInstance(this.model.currentInstance);
 
    }
 
    OnBusTypeChanged = (e) => {
       console.log("OnBusTypeChanged", e.target.value)
-
+      
       let busInstance = e.target.bus
-      busInstance.pins.length = 0;
-      busInstance.sensors.length = 0;
-      busInstance.type = e.target.value;
-      busInstance.id = e.target.value + "." + e.target.bus.instance;
-      e.target.inputElement.value = busInstance.id;
+      if(e.target.value != "delete"){
+         busInstance.pins.length = 0;
+         busInstance.sensors.length = 0;
+         busInstance.type = e.target.value;
+         busInstance.id = e.target.value + "." + e.target.bus.instance;
+         e.target.inputElement.value = busInstance.id;
 
-      busInstance.busType.pins.forEach(p => {
-         let pin = new BusInstancePin(p)
-         busInstance.pins.push(pin)
-      })
+         busInstance.busType.pins.forEach(p => {
+            let pin = new BusInstancePin(p)
+            busInstance.pins.push(pin)
+         })
 
-      console.log("OnBusTypeChanged busInstance", busInstance)
+         console.log("OnBusTypeChanged busInstance", busInstance)
+      }
+      else{
+         this.model.currentInstance.buses = this.model.currentInstance.buses.filter(bus => bus.id !== busInstance.id)
+      }
+
+      
 
       this.view.displayDeviceInstance(this.model.currentInstance);
    }
